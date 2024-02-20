@@ -8,31 +8,51 @@ services:
     volumes:
       - /var/run/docker.sock:/tmp/docker.sock:ro
     depends_on:
-      - blog
+      - blog_a
+      - blog_b
     deploy:
       resources:
         limits:
-          cpus: '0.02'
+          cpus: '0.10'
+          memory: 50M
+        reservations:
+          cpus: '0.05'
+          memory: 20M
+
+  blog_a:
+    build: blogA/
+    # image: memento12/testblog-a:0.1.0
+    deploy:
+      mode: replicated
+      replicas: 1 # https://docs.docker.com/compose/compose-file/deploy/#replicas
+      resources: # https://docs.docker.com/compose/compose-file/compose-file-v3/#resources
+        limits:
+          cpus: '0.05'
           memory: 50M
         reservations:
           cpus: '0.01'
           memory: 20M
-
-  blog:
-    # build: ../../docker_file/httpd
-    image: pysatellite/blog-tomsawyer
-    deploy:
-      mode: replicated
-      replicas: 2 # https://docs.docker.com/compose/compose-file/deploy/#replicas
-      resources: # https://docs.docker.com/compose/compose-file/compose-file-v3/#resources
-        limits:
-          cpus: '0.02'
-          memory: 30M
-        reservations:
-          cpus: '0.01'
-          memory: 10M
     expose:
       - "80"
     environment:
       - VIRTUAL_HOST=aws.google.com
+      - VIRTUAL_PORT=80
+
+  blog_b:
+    build: blogB/
+    # image: memento12/testblog-a:0.1.0
+    deploy:
+      mode: replicated
+      replicas: 1 # https://docs.docker.com/compose/compose-file/deploy/#replicas
+      resources: # https://docs.docker.com/compose/compose-file/compose-file-v3/#resources
+        limits:
+          cpus: '0.05'
+          memory: 50M
+        reservations:
+          cpus: '0.01'
+          memory: 20M
+    expose:
+      - "80"
+    environment:
+      - VIRTUAL_HOST=google.aws.com, nginx.aws.com
       - VIRTUAL_PORT=80
